@@ -1,3 +1,7 @@
+"""
+Print the expected and actual counts of parsed content articles per wiki.
+"""
+
 import os, subprocess, requests
 
 print "=id=\t=url=".ljust(40)+"\t==expected==\t==actual=="

@@ -1,3 +1,6 @@
+"""
+Count all XML files and write totals to file.
+"""
 import os
 
 xml_dir = '/data/xml'
