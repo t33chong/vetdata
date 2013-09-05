@@ -1,3 +1,9 @@
+"""
+Move XML files from a flat directory structure to subdirectories determined by
+the pageid's first digit.
+Probably won't need this moving forward, as this is done automatically.
+"""
+
 import os, shutil
 
 xml_dir = '/data/xml'
