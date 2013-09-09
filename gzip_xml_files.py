@@ -11,9 +11,10 @@ for wid in os.listdir(xml_dir):
     for subdir in os.listdir(wid_dir):
         subdir_path = os.path.join(wid_dir, subdir)
         for xml_file in os.listdir(subdir_path):
-            xml_path = os.path.join(subdir_path, xml_file)
-            gzip_filepath = xml_path + '.gz'
-            gzip_file = gzip.GzipFile(gzip_filepath, 'w')
-            gzip_file.write(open(xml_path).read())
-            gzip_file.close()
-            os.remove(xml_path)
+            if xml_file.endswith('.xml'):
+                xml_path = os.path.join(subdir_path, xml_file)
+                gzip_filepath = xml_path + '.gz'
+                gzip_file = gzip.GzipFile(gzip_filepath, 'w')
+                gzip_file.write(open(xml_path).read())
+                gzip_file.close()
+                os.remove(xml_path)
