@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import gzip
 from multiprocessing import Pool
@@ -6,43 +7,31 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from WikiaSolr import QueryIterator
 from nlp_client import title_confirmation
-from nlp_client.services import RedirectsService
+from nlp_client.services import AllTitlesService
 
 title_confirmation.USE_S3 = False
 
-qi = QueryIterator('http://search-s10:8983/solr/xwiki/', {'query': 'lang_s:en', 'fields': 'id', 'sort': 'id asc'})
+docs = [wid.strip() for wid in open('missing-titles.txt')]
 
-#def gen_docs():
-#    for doc in qi:
-#        print 'yielding', doc['id']
-#        yield doc['id']
-#
-#docs = gen_docs()
-
-docs = []
-for doc in qi:
-    print 'appending', doc['id']
-    docs.append(doc['id'])
-
-
-redirects_dir = '/data/redirects/'
+titles_dir = '/data/titles/'
 
 bucket = S3Connection().get_bucket('nlp-data')
 k = Key(bucket)
 
-def call_redirects(doc):
+def call_titles(doc):
     try:
-        print 'Calling RedirectsService on', doc
-        redirects = json.dumps(RedirectsService().get(doc))
-        redirects_file = redirects_dir + doc + '.gz'
-        g = gzip.GzipFile(redirects_file, 'w')
-        g.write(redirects)
+        print 'Calling AllTitlesService on', doc
+        titles = json.dumps(AllTitlesService().get(doc), ensure_ascii=False)
+        titles_file = titles_dir + doc + '.gz'
+        g = gzip.GzipFile(titles_file, 'w')
+        g.write(titles)
         g.close()
-        k.key = 'article_redirects/%s' % os.path.basename(redirects_file)
-        k.set_contents_from_filename(redirects_file)
-        os.remove(redirects_file)
+        k.key = 'article_titles/%s' % os.path.basename(titles_file)
+        k.set_contents_from_filename(titles_file)
+        os.remove(titles_file)
     except:
         print doc, 'failed!'
+        raise
 
 pool = Pool(processes=7)
-pool.map(call_redirects, docs)
+pool.map(call_titles, docs)
