@@ -9,13 +9,13 @@ def get_title_and_headline(wid):
     response = requests.get(
         'http://search-s10:8983/solr/main/select',
         params={'q': 'wid:%s AND is_main_page:true' % wid,
-                'fl': 'url,headline_txt', 'wt': 'json'}).json()
+                'fl': 'url,wikititle_en', 'wt': 'json'}).json()
 
     try:
         doc = response.get('response', {}).get('docs', [{}])[0]
 
         url = doc.get('url', False)
-        headline = doc.get('headline_txt', '')
+        headline = doc.get('wikititle_en', '')
 
         title = ''
         if url:
@@ -23,13 +23,13 @@ def get_title_and_headline(wid):
             soup = BeautifulSoup(html)
             title = soup.title.string.encode('utf-8')
 
-        print '%s,%s,%s' % (wid, title, headline)
+        print '%s\t%s\t%s' % (wid, title, headline)
     except KeyboardInterrupt:
         sys.exit(0)
     except:
-        print '%s,ERROR,ERROR' % wid
+        print '%s\tERROR\tERROR' % wid
 
-print 'wid,title,headline'
+print 'wid\ttitle\theadline'
 Pool(processes=8).map(
     get_title_and_headline,
-    [line.strip() for line in open('topwams.txt').readlines()[:500]])
+    [line.strip() for line in open('topwams.txt').readlines()[:600]])
