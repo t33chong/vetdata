@@ -1,5 +1,7 @@
 import requests
+import sys
 from bs4 import BeautifulSoup
+from multiprocessing import Pool
 from urllib2 import urlopen
 
 
@@ -9,19 +11,25 @@ def get_title_and_headline(wid):
         params={'q': 'wid:%s AND is_main_page:true' % wid,
                 'fl': 'url,headline_txt', 'wt': 'json'}).json()
 
-    doc = response.get('response', {}).get('docs', [{}])[0]
+    try:
+        doc = response.get('response', {}).get('docs', [{}])[0]
 
-    url = doc.get('url', False)
-    headline = doc.get('headline_txt', '')
+        url = doc.get('url', False)
+        headline = doc.get('headline_txt', '')
 
-    title = ''
-    if url:
-        html = urlopen(url).read()
-        soup = BeautifulSoup(html)
-        title = soup.title.string.encode('utf-8')
+        title = ''
+        if url:
+            html = urlopen(url).read()
+            soup = BeautifulSoup(html)
+            title = soup.title.string.encode('utf-8')
 
-    print '%s,%s,%s' % (wid, title, headline)
+        print '%s,%s,%s' % (wid, title, headline)
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except:
+        print '%s,ERROR,ERROR' % wid
 
 print 'wid,title,headline'
-for line in open('topwams.txt').readlines()[:500]:
-    get_title_and_headline(line.strip())
+Pool(processes=8).map(
+    get_title_and_headline,
+    [line.strip() for line in open('topwams.txt').readlines()[:500]])
