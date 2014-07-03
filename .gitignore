@@ -1,2 +1,7 @@
 *.swp
-missing-*.txt
+*.txt
+*.json
+*.csv
+*.errors
+*.bak
+events/
